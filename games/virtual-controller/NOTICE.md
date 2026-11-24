@@ -9,6 +9,8 @@ Copyright (C) 2012-2015 OUYA, Inc.
   `Html5/VirtualController/web_archive/*.png`.
 - **`ouya_icon.png`**: `Html5/VirtualController/customization/res/drawable-xhdpi/ouya_icon.png`,
   scaled from 960×540 to the 732×412 the OUYA launcher requires.
+- **`icon.png`**: the app icon, made from `controller/controller.png` scaled to 184×184 on a
+  CornflowerBlue 192×192 background.
 - **`main.gd`**: rewritten in GDScript, based on the layout and logic of
   `Html5/VirtualController/web_archive/index.html`.
 

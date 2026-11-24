@@ -1,6 +1,6 @@
 <#
   Play-test a game on this PC with Godot-for-OUYA (no build, no OUYA needed).
-    run.cmd                      # games\hello-ouya
+    run.cmd                      # games\virtual-controller
     run.cmd space-game
     run.cmd space-game -Windowed # don't go fullscreen
   Any gamepad Windows sees works as the controller. Close the window or press Alt+F4 to quit.

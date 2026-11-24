@@ -92,9 +92,13 @@ function Read-Entry($zip, [string]$name) {
     try { $s.CopyTo($ms); return $ms.ToArray() } finally { $s.Dispose(); $ms.Dispose() }
 }
 
-# Placeholder icon that new-game.cmd copies from template\
+# Placeholder icons that new-game.cmd copies from template\
 $templateIcon = Join-Path $OuyaRoot 'template\ouya_icon.png'
 $templateIconMd5 = if (Test-Path $templateIcon) { Get-Md5 ([IO.File]::ReadAllBytes($templateIcon)) } else { '' }
+$templateAppIcon = Join-Path $OuyaRoot 'template\icon.png'
+$templateAppIconMd5 = if (Test-Path $templateAppIcon) { Get-Md5 ([IO.File]::ReadAllBytes($templateAppIcon)) } else { '' }
+# Godot's own logo, which the exporter puts in res/drawable/icon.png when application/icon is not set
+$godotAppIconMd5 = 'A4-9E-95-B5-53-6C-7F-9E-B7-08-7B-CD-80-42-1D-86'
 
 function Test-Game($g) {
     Write-Host ''
@@ -151,6 +155,28 @@ function Test-Game($g) {
             $md5 = Get-Md5 ([IO.File]::ReadAllBytes($iconPath))
             if ($md5 -eq $templateIconMd5) { Warn 'ouya_icon.png is still the template placeholder - replace it with your own art' }
             else { Ok 'OUYA icon: 732x412 PNG' }
+        }
+    }
+
+    # --- App icon (application/icon in engine.cfg -> res/drawable/icon.png) ----
+    # Square icon Android uses for the app itself (app lists, Make > Software, Android TV launchers).
+    # Without it the APK carries the Godot logo.
+    $appIconRes = $eng['application/icon']
+    $appIconPath = $null
+    if (-not $appIconRes) {
+        Warn 'no app icon - Android shows the Godot logo for this app. Add a square icon.png (e.g. 192x192) and icon="res://icon.png" under [application] in engine.cfg'
+    } elseif ($appIconRes -notmatch '^res://') {
+        Warn "application/icon '$appIconRes' is not a res:// path"
+    } else {
+        $appIconPath = Join-Path $dir ($appIconRes -replace '^res://', '')
+        if (-not (Test-Path $appIconPath)) { Err "app icon $appIconRes not found"; $appIconPath = $null }
+        else {
+            $size = Get-PngSize $appIconPath
+            if (-not $size) { Err "$(Split-Path $appIconPath -Leaf) is not a PNG - the Android export needs a PNG app icon"; $appIconPath = $null }
+            elseif ($size[0] -ne $size[1]) { Warn "app icon is $($size[0])x$($size[1]) - make it square (e.g. 192x192)" }
+            elseif ($size[0] -lt 96) { Warn "app icon is only $($size[0])x$($size[1]) - use at least 96x96 (192x192 is best)" }
+            elseif ((Get-Md5 ([IO.File]::ReadAllBytes($appIconPath))) -eq $templateAppIconMd5) { Warn 'icon.png is still the template placeholder - replace it with your own art' }
+            else { Ok "app icon: $($size[0])x$($size[1]) PNG" }
         }
     }
 
@@ -237,6 +263,13 @@ function Test-Game($g) {
             elseif ($iconPath -and (Test-Path $iconPath) -and (Get-Md5 $apkIcon) -ne (Get-Md5 ([IO.File]::ReadAllBytes($iconPath)))) {
                 Warn "APK's OUYA icon differs from $(Split-Path $iconPath -Leaf) - rebuild"
             } else { Ok 'OUYA icon in APK' }
+
+            $apkAppIcon = Read-Entry $zip 'res/drawable/icon.png'
+            if (-not $apkAppIcon) { Warn 'APK has no res/drawable/icon.png' }
+            elseif ($appIconPath -and (Get-Md5 $apkAppIcon) -ne (Get-Md5 ([IO.File]::ReadAllBytes($appIconPath)))) {
+                Warn "APK's app icon differs from $(Split-Path $appIconPath -Leaf) - rebuild"
+            } elseif ((Get-Md5 $apkAppIcon) -eq $godotAppIconMd5) { Warn 'APK app icon is the Godot logo' }
+            else { Ok 'app icon in APK' }
         } finally { $zip.Dispose() }
     }
 }

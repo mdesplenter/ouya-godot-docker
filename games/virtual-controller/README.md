@@ -5,15 +5,8 @@ Port of the OUYA SDK example `Html5/VirtualController`
 in a 2x2 grid. Every button you press lights up on the image, the sticks move, and
 the stick and trigger values are shown below each controller.
 
-## Install into the toolkit
-
-```bat
-new-game.cmd "Virtual Controller"
-```
-
-Copy the contents of this folder into `games\virtual-controller\` and overwrite
-`main.tscn`, `main.gd` and `ouya_icon.png`. Keep the `engine.cfg` and `export.cfg`
-created by `new-game.cmd`.
+This is the toolkit's example game: `run.cmd`, `build.cmd` and `deploy.cmd` use it when you
+don't name a game.
 
 ```bat
 run.cmd virtual-controller -Windowed

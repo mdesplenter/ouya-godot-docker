@@ -1,6 +1,6 @@
 <#
   Build an OUYA APK in the Docker build container (Docker Desktop must be running).
-    build.cmd                        # debug APK of games\hello-ouya -> build\hello-ouya-debug.apk
+    build.cmd                        # debug APK of games\virtual-controller -> build\virtual-controller-debug.apk
     build.cmd space-game             # games\space-game
     build.cmd C:\path\to\project     # any Godot 2.1 project folder
     build.cmd space-game -Release    # release APK (needs a release keystore in the game's export settings)

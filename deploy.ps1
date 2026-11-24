@@ -1,6 +1,6 @@
 <#
   Install and launch a built game on the OUYA with adb.
-    deploy.cmd                                  # hello-ouya over USB
+    deploy.cmd                                  # virtual-controller over USB
     deploy.cmd space-game -Ip 192.168.1.50      # over the network (adb port 5555)
     deploy.cmd space-game -Ip 192.168.1.50 -Logcat
     deploy.cmd space-game -Release

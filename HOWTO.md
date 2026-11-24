@@ -49,7 +49,7 @@ Then start Docker Desktop and build the example once. This also builds the Docke
 which takes a few minutes the first time:
 
 ```bat
-build.cmd hello-ouya
+build.cmd virtual-controller
 ```
 
 ## 3. Make a game
@@ -60,10 +60,14 @@ new-game.cmd "Space Game"
 
 This creates `games\space-game\` from `template\` with:
 
-- `engine.cfg`: project settings (1280×720, fullscreen)
+- `engine.cfg`: project settings (1280×720, fullscreen) and the app icon (`icon="res://icon.png"`)
 - `export.cfg`: Android **package name** (`org.ouyadev.spacegame`), app title and OUYA icon
 - `ouya_icon.png`: the **732×412** tile the OUYA shows in its menu. Replace the placeholder
   with your own art (same size)
+- `icon.png`: the square **app icon** (192×192) Android uses for the app itself (app lists,
+  Make → Software). Without it the APK carries the Godot logo. Replace the placeholder too.
+  To use another file, change `icon=` under `[application]` in `engine.cfg` (in the editor:
+  Scene → Project Settings → application → icon)
 - `main.tscn` + `main.gd`: a starter scene that shows controller button and axis numbers
 
 Pick your own package name if you'll share the game, because it must be unique on the console:
@@ -120,11 +124,13 @@ check.cmd space-game -Quiet     :: only warnings and errors
 
 It looks at:
 - **the project**: `main_scene`, 720p/1080p resolution and stretch mode, a unique package
-  name, `ouya_icon.png` (present, PNG, exactly 732×412, not still the placeholder)
+  name, `ouya_icon.png` (present, PNG, exactly 732×412, not still the placeholder), the
+  app icon from `application/icon` (set, square PNG, at least 96×96, not still the placeholder)
 - **the scripts**: Godot 3/4-only syntax that Godot 2.1 can't run (`$Node`, typed variables,
   `_physics_process`, `move_and_slide`, …)
 - **the built APK** in `build\`, if there is one: OUYA launcher category, minSdk 16, SHA-1
-  signature, ARM engine library, the right icon, and whether it's older than your changes
+  signature, ARM engine library, the right OUYA icon and app icon, and whether it's older than
+  your changes
 
 `build.cmd` runs the project checks first and stops on errors (warnings don't stop it):
 
@@ -276,7 +282,7 @@ Godot for OUYA.cmd  open the editor
 *.ps1               the scripts behind the .cmd files (common.ps1 = shared helpers)
 docker\             build container: Dockerfile, entrypoint.sh, jarsigner-ouya
 template\           starting point for new games
-games\hello-ouya\   example game
+games\virtual-controller\  example game: shows every button and stick of up to 4 controllers
 tools\, build\      created locally, git-ignored
 ```
 

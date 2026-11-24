@@ -5,7 +5,7 @@ $OuyaRoot = $PSScriptRoot
 # A game is a Godot 2.1 project folder (has engine.cfg). Accepts a folder name under
 # .\games\ or any path. Returns Dir, Id (folder name, used for the APK name) and Package.
 function Resolve-Game([string]$Game) {
-    if (-not $Game) { $Game = 'hello-ouya' }
+    if (-not $Game) { $Game = 'virtual-controller' }
     if (Test-Path (Join-Path $Game 'engine.cfg')) {
         $dir = (Resolve-Path $Game).Path
     } else {

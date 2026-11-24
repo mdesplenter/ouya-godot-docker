@@ -168,9 +168,9 @@ foreach ($k in $want.Keys) {
 
 Write-Host ''
 Write-Host 'Done.' -ForegroundColor Green
-Write-Host "  Editor:     double-click 'Godot for OUYA.cmd' and import games\hello-ouya\engine.cfg"
+Write-Host "  Editor:     double-click 'Godot for OUYA.cmd' and import games\virtual-controller\engine.cfg"
 Write-Host '  New game:   new-game.cmd "My Game"'
-Write-Host '  Play-test:  run.cmd hello-ouya                (on this PC)'
-Write-Host '  Build:      build.cmd hello-ouya              (Docker)'
-Write-Host '  Deploy:     deploy.cmd hello-ouya -Ip <ouya-ip>'
+Write-Host '  Play-test:  run.cmd virtual-controller        (on this PC)'
+Write-Host '  Build:      build.cmd virtual-controller      (Docker)'
+Write-Host '  Deploy:     deploy.cmd virtual-controller -Ip <ouya-ip>'
 Write-Host '  More:       see HOWTO.md'

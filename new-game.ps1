@@ -33,7 +33,9 @@ Set-Content -Path (Join-Path $Path '.gitignore') -Encoding ASCII -Value ".fscach
 Write-Host "Created $Path"
 Write-Host "  name:    $Name"
 Write-Host "  package: $Package"
-Write-Host "  icon:    $Path\ouya_icon.png  (placeholder - replace with your own 732x412 PNG)"
+Write-Host "  icons:   $Path\ouya_icon.png  (OUYA PLAY menu tile, 732x412)"
+Write-Host "           $Path\icon.png       (square app icon, 192x192)"
+Write-Host "           Both are placeholders - replace them with your own art."
 Write-Host ''
 Write-Host "Open it:  'Godot for OUYA.cmd' -> Import -> $Path\engine.cfg"
 $arg = if ($Path -eq (Join-Path $OuyaRoot "games\$slug")) { $slug } else { "`"$Path`"" }
