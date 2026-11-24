@@ -135,6 +135,10 @@ function Test-Game($g) {
     if ($exp['platform:Android/package/name']) { Ok "app title: $($exp['platform:Android/package/name'])" }
     else { Info 'no package/name - the OUYA shows the project name' }
 
+    if ($exp['platform:Android/keystore/release_password']) {
+        Warn 'export.cfg contains your release keystore password (keystore/release_password) - remove it before you commit; build.cmd -Release asks for it instead'
+    }
+
     # --- OUYA icon ----------------------------------------------------------
     $iconRes = $exp['platform:Android/package/ouya_icon']
     $iconPath = $null

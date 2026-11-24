@@ -4,6 +4,7 @@
     deploy.cmd space-game -Ip 192.168.1.50      # over the network (adb port 5555)
     deploy.cmd space-game -Ip 192.168.1.50 -Logcat
     deploy.cmd space-game -Release
+    deploy.cmd space-game -Ip 192.168.1.50 -Clean   # uninstall first (new icon, or debug <-> release key)
     deploy.cmd -Apk some.apk -Package com.example.thing
 #>
 param(
@@ -12,6 +13,7 @@ param(
     [string]$Apk,
     [string]$Package,
     [switch]$Release,
+    [switch]$Clean,
     [switch]$Logcat
 )
 $ErrorActionPreference = 'Stop'
@@ -36,9 +38,18 @@ if ($Ip) {
 }
 
 & $Adb @target wait-for-device
+if ($Clean) {
+    # Also clears the OUYA's cached menu tile, and removes the game's saved data
+    Write-Host "Uninstalling $Package ..."
+    & $Adb @target uninstall $Package | Write-Host
+}
 Write-Host "Installing $Apk ..."
-& $Adb @target install -r $Apk
-if ($LASTEXITCODE -ne 0) { throw 'adb install failed' }
+$result = (& $Adb @target install -r $Apk 2>&1 | ForEach-Object { "$_" }) -join "`n"
+Write-Host $result
+if ($result -match 'INCONSISTENT_CERTIFICATES|signatures do not match') {
+    throw "The OUYA has $Package signed with a different key (debug and release builds use different keys). Run again with -Clean to uninstall it first (this deletes the game's saved data)."
+}
+if ($LASTEXITCODE -ne 0 -or $result -notmatch 'Success') { throw 'adb install failed' }
 
 Write-Host "Launching $Package ..."
 & $Adb @target shell monkey -p $Package -c android.intent.category.LAUNCHER 1 | Out-Null

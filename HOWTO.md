@@ -61,16 +61,23 @@ new-game.cmd "Space Game"
 This creates `games\space-game\` from `template\` with:
 
 - `engine.cfg`: project settings (1280×720, fullscreen) and the app icon (`icon="res://icon.png"`)
-- `export.cfg`: Android **package name** (`org.ouyadev.spacegame`), app title and OUYA icon
+- `export.cfg`: Android **package name** (the one you typed in), app title and OUYA icon
 - `ouya_icon.png`: the **732×412** tile the OUYA shows in its menu. Replace the placeholder
   with your own art (same size)
 - `icon.png`: the square **app icon** (192×192) Android uses for the app itself (app lists,
   Make → Software). Without it the APK carries the Godot logo. Replace the placeholder too.
   To use another file, change `icon=` under `[application]` in `engine.cfg` (in the editor:
   Scene → Project Settings → application → icon)
-- `main.tscn` + `main.gd`: a starter scene that shows controller button and axis numbers
+- `main.tscn` + `main.gd`: a starter scene that shows controller button and axis numbers.
+  It already sets the OUYA controller mapping (`ouya_mapping()`, see section 7), so keep the
+  `Input.add_joy_mapping(ouya_mapping(), true)` line in your main scene's `_ready()`
 
-Pick your own package name if you'll share the game, because it must be unique on the console:
+It asks for the **package name**: the game's unique id on the console, like
+`com.yourname.spacegame`. Two games with the same package name overwrite each other on the
+OUYA, and you can't change it after you share the game. Press Enter to take the suggestion,
+`org.ouyadev.spacegame`.
+`new-game.cmd` refuses names that aren't valid, are Godot's default, or are already used by
+another game in `games\`. To skip the question, give it on the command line:
 
 ```bat
 new-game.cmd "Space Game" -Package com.yourname.spacegame
@@ -137,8 +144,10 @@ It looks at:
 ```bat
 build.cmd space-game            :: -> build\space-game-debug.apk
 build.cmd space-game -SkipCheck :: build even if the check finds errors
-build.cmd -Rebuild              :: rebuild the Docker image (after changing docker\)
+build.cmd -Rebuild              :: rebuild the Docker image from scratch
 ```
+
+When you change anything in `docker\`, the next build rebuilds the Docker image by itself.
 
 The build prints which OUYA icon it used and checks the signature
 (`Signed: SHA-1 (OUYA compatible)`).
@@ -158,7 +167,9 @@ deploy.cmd space-game -Ip 192.168.1.50 -Logcat
 This installs the APK, starts the game, and shows Godot's log output (`print()` included).
 Press **Ctrl+C** to stop the log. Without `-Ip` it uses USB.
 
-The game shows up in the OUYA's **PLAY** menu with its `ouya_icon.png`.
+The game shows up in the OUYA's **PLAY** menu with its `ouya_icon.png`. The OUYA keeps the
+menu tile of the first install: after changing the icon, deploy once with `-Clean`, which
+uninstalls the game first (and deletes its saved data).
 
 ## 7. Controller input
 
@@ -228,12 +239,40 @@ tools\jdk8\bin\keytool -genkeypair -keystore C:\keys\mygames.keystore -storetype
   -alias mygames -keyalg RSA -keysize 2048 -sigalg SHA1withRSA -validity 10000
 ```
 
-In the editor: **Export → Android → Keystore**. Set the release keystore, user (alias) and
-password, then export with debugging turned off.
+keytool asks for a keystore password, your name and so on, and then for the key password:
+**press Enter to use the same password**. The build only works when both passwords are the same.
+Put the keystore outside your game folder, and back up the file and its password.
 
-`build.cmd space-game -Release` also exists, but the Docker container only sees the game folder
-and the editor saves the keystore as a Windows path. Container release builds won't find your
-key unless you adapt them. Use the editor for release builds.
+Build a release APK from the command line:
+
+```bat
+build.cmd space-game -Release -Keystore C:\keys\mygames.keystore -Alias mygames
+```
+
+It asks for the keystore password and writes `build\space-game-release.apk`. The build prints
+the certificate it signed with (`Certificate: CN=...`), so you can check it's your key and not
+the debug key. The password is never saved: the build passes it only to a throw-away copy of
+`export.cfg` inside the container. To avoid the prompt (in a script, for example), set
+`$env:OUYA_KEYSTORE_PASS` first.
+
+**Per game:** if you set the release keystore and user (alias) in the editor
+(**Export → Android → Keystore**), they're saved in the game's `export.cfg`, and
+`build.cmd space-game -Release` uses them, so you don't have to type `-Keystore` and `-Alias`
+every time. Leave the editor's password field empty: `check.cmd` warns if
+`export.cfg` contains a password, because that file goes into git.
+
+Install it on the OUYA:
+
+```bat
+deploy.cmd space-game -Ip 192.168.1.50 -Release -Clean
+```
+
+Debug and release builds are signed with different keys, and Android won't update an app with
+an APK signed by another key. `-Clean` uninstalls the game first. This deletes its saved data.
+You only need it when you switch between debug and release.
+
+You can still export from the editor instead: set the keystore, alias and password there,
+then export with debugging turned off.
 
 ## 10. Troubleshooting
 

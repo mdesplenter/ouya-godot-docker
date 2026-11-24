@@ -14,4 +14,10 @@ done
 [ $saw_digest = 0 ] && args=(-digestalg SHA1 "${args[@]}")
 [ $saw_sig = 0 ]    && args=(-sigalg SHA1withRSA "${args[@]}")
 echo "[jarsigner-ouya] signing with SHA1 / SHA1withRSA" >&2
-exec "$REAL" "${args[@]}"
+# stdin from /dev/null: if the key needs a password Godot didn't pass, fail instead of waiting
+"$REAL" "${args[@]}" < /dev/null > /tmp/jarsigner.log 2>&1
+rc=$?
+cat /tmp/jarsigner.log >&2
+# Tell entrypoint.sh, so it stops waiting for a signed APK
+[ $rc != 0 ] && echo $rc > /tmp/jarsigner.failed
+exit $rc
