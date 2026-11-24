@@ -1,0 +1,18 @@
+# Downloaded by setup-windows.cmd
+tools/
+
+# Build output
+build/
+*.apk
+
+# Signing keys - never commit these
+*.keystore
+*.jks
+
+# Godot 2 editor cache
+.fscache
+
+# Your own games live in games/ but aren't part of this toolkit repo
+# (give each game its own git repo). Only the example is tracked.
+games/*
+!games/hello-ouya/

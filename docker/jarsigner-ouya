@@ -1,0 +1,17 @@
+#!/bin/bash
+# Wrapper Godot calls instead of jarsigner: forces SHA-1 digest + SHA1withRSA,
+# the only APK signature the OUYA (Android 4.1) accepts.
+REAL="${REAL_JARSIGNER:-$(command -v jarsigner)}"
+args=() ; skip=0 ; saw_digest=0 ; saw_sig=0
+for a in "$@"; do
+  if [ $skip = 1 ]; then skip=0; continue; fi
+  case "$a" in
+    -digestalg) args+=(-digestalg SHA1); skip=1; saw_digest=1 ;;
+    -sigalg)    args+=(-sigalg SHA1withRSA); skip=1; saw_sig=1 ;;
+    *)          args+=("$a") ;;
+  esac
+done
+[ $saw_digest = 0 ] && args=(-digestalg SHA1 "${args[@]}")
+[ $saw_sig = 0 ]    && args=(-sigalg SHA1withRSA "${args[@]}")
+echo "[jarsigner-ouya] signing with SHA1 / SHA1withRSA" >&2
+exec "$REAL" "${args[@]}"
