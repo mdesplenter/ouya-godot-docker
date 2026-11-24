@@ -13,6 +13,7 @@ build/
 .fscache
 
 # Your own games live in games/ but aren't part of this toolkit repo
-# (give each game its own git repo). Only the example is tracked.
+# (give each game its own git repo). Only the examples are tracked.
 games/*
 !games/hello-ouya/
+!games/virtual-controller/
